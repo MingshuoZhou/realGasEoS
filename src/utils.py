@@ -58,3 +58,12 @@ def get_TPD_under_P(fluid,P, T_lo, T_hi, T_step=20, D_step=40):
             T = T - alpha*(T - T_old)
             count += 1
     return TPD_arr
+
+def get_data(fluid,P, T_lo, T_hi, T_step, Dataname):
+    TPD_arr = []
+    T = T_lo
+    while T <= T_hi:
+        D = CP.PropsSI(Dataname, "T", T, "P", P, fluid)
+        TPD_arr.append([T, P, D])
+        T += T_step
+    return TPD_arr

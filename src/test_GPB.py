@@ -1,3 +1,5 @@
+import numpy as np
+
 from utils import *
 from copy import deepcopy
 np.random.seed(0)
@@ -15,10 +17,11 @@ name = 'c12h26'
 data = np.loadtxt("mech/Alpha/%s.csv"%name, delimiter=',')
 dim = data.shape[1]-1
 X = data[:,:dim]
+print(np.shape(X))
 y = data[:,dim]
 N = len(y)
 
-Ntrain = int(N*0.7)
+Ntrain = int(N*0.8)
 Ntest = N - Ntrain
 idx = np.random.permutation(N)
 Xall = deepcopy(X)
@@ -29,9 +32,10 @@ Xtest = Xall[idx[Ntrain:], :]
 ytest = yall[idx[Ntrain:]]
 
 para = np.loadtxt('mech/Alpha/%s_para.csv'%name, delimiter=',')
-𝛾 = para[0,:dim]*5 # kernel size
+𝛾 = para[0,:dim] # kernel size
 σ = para[0,dim]  # kernel multiplier
 θ = para[1,:]    # basis function's parameters
+print("theta:", θ)
 
 AS = CP.AbstractState("HEOS", fluid)
 Tc = CP.PropsSI(fluid, 'Tcrit')
@@ -60,9 +64,12 @@ def dfdθ(x, θ):
         return np.vstack([np.ones(N), x[:,0], x[:,1]]).T
 
 K0  = k0(X, X)
+print(len(K0))
 df = dfdθ(X,θ)
 Hm = [np.outer(df[i], df[j]) * K0[i,j] for i in range(len(X)) for j in range(len(X))]
 H = np.mean(Hm, axis=0)
+print(H)
+print(np.linalg.pinv(H))
 
 def h(X1, X, θ):
     K0x = k0(X1, X)
@@ -70,7 +77,7 @@ def h(X1, X, θ):
     return df.T * np.mean(K0x, axis=1)
 
 def k(X1, X2, X, H, θ):
-    return k0(X1,X2) + h(X1,X,θ).T @ np.linalg.inv(H) @ h(X2,X,θ)
+    return k0(X1,X2) + h(X1,X,θ).T @ np.linalg.pinv(H) @ h(X2,X,θ)
 
 
 # ================================================
@@ -83,7 +90,7 @@ Xnew_l = np.empty([M,dim]) # left
 Xnew_r = np.empty([M,dim]) # right
 
 Xnew[:,0] = np.linspace(np.min(X[:,0]), np.max(X[:,0]),M)
-Xnew[:,1] = np.ones(M) * 3
+Xnew[:,1] = np.ones(M) * 2
 
 Xnew_l[:,0] = Xnew[:,0]-deltaTr
 Xnew_r[:,0] = Xnew[:,0]+deltaTr
@@ -110,6 +117,12 @@ Kx = k(X, Xnew, X, H, θ)
 mu = f(Xnew,θ) + Kx.T @ Ki @ (y-f(X,θ))
 cov = Kxx - Kx.T @ Ki @ Kx
 sigma = np.diag(cov)
+
+# Xnew = np.array([[600/Tc, 2e6/Pc]])
+Xn = np.array([[1.1, 2]])
+print("f=", f(Xn,θ))
+Kx = k(X, Xn, X, H, θ)
+print("y=",  f(Xn,θ) + Kx.T @ Ki @ (y-f(X,θ)))
 
 Ypred = f(X,θ) + K.T @ Ki @ (y-f(X,θ))
 # GP predict behind
