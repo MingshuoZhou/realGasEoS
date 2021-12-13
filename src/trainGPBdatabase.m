@@ -1,4 +1,4 @@
-p=parpool(40);
+p=parpool(8);
 % Loading data
 tic
 dataNames = ["CO2","CH4","H2","O2","H2O"];
@@ -6,14 +6,13 @@ files = ["conductivity", "Cpmass", "Density", "Hmass", "Smass", "A", "Umass", "v
 
 N=size(dataNames,2);
 M=size(files,2);
-
 parfor i=1:N
     
     dataName=dataNames(i);
     for j=1:M
         file=files(j);
-        dataFile = ['../mech/' file '/' dataName '.csv'];
-        paraFile = ['../mech/' file '/' dataName '_para.csv'];
+        dataFile = sprintf('../mech/%s/%s.csv',file,dataName);
+        paraFile = sprintf('../mech/%s/%s_para.csv',file,dataName);
 
         % dataFile = ['../mech/CP/' dataName '.csv'];
         % paraFile = ['../mech/CP/' dataName '_para.csv'];
@@ -52,6 +51,7 @@ parfor i=1:N
         para = [gprMdl.KernelInformation.KernelParameters'; gprMdl.Beta';H];
 
         writematrix(para, paraFile);
+
     end
 end
 toc

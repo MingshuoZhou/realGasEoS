@@ -8,7 +8,7 @@ fluids = ["CO2","CH4","H2","O2","H2O"]
 names = ["co2","ch4","h2","o2","h2o"]
 datanames = ["L", "C", "D", "H", "S", "A", "U", "V"]
 files = ["conductivity", "Cpmass", "Density", "Hmass", "Smass", "A", "Umass", "viscosity"]
-T_step = 5
+T_step = 2
 T_lo, T_hi = 275, 550
 P_arr = np.array([10]) * 1e6
 for i, fluid in enumerate(fluids):
