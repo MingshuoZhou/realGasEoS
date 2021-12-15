@@ -4,13 +4,14 @@ import os
 print(os.getcwd())
 
 # settings for CO2,CH4,H2,O2,H20
-fluids = ["CO2","CH4","H2","O2","H2O"]
-names = ["co2","ch4","h2","o2","h2o"]
+fluids = ["CO2","CH4","H2","O2","H2O", "C12"]
+names = ["co2","ch4","h2","o2","h2o", "c12h26"]
 datanames = ["L", "C", "D", "H", "S", "A", "U", "V"]
 files = ["conductivity", "Cpmass", "Density", "Hmass", "Smass", "A", "Umass", "viscosity"]
 T_step = 2
 T_lo, T_hi = 275, 550
 P_arr = np.array([10]) * 1e6
+D_step = 400
 for i, fluid in enumerate(fluids):
     Pcrit = CP.PropsSI(fluid, 'pcrit')
     Tcrit = CP.PropsSI(fluid, 'Tcrit')
@@ -29,7 +30,7 @@ for i, fluid in enumerate(fluids):
     for k, dataname in enumerate(datanames):
         TPD_arr = []
         for P in P_arr:
-            TPD_arr += get_data(fluid, P, T_lo, T_hi, T_step, dataname)
+            TPD_arr += get_data(fluid, P, T_lo, T_hi, T_step, D_step, dataname)
         TPD_arr = np.array(TPD_arr)
 
         T = TPD_arr[:, 0]
@@ -50,7 +51,7 @@ for i, fluid in enumerate(fluids):
         Data[:,0] = T / Tcrit
         Data[:,1] = P / Pcrit
         Data[:,2] = D
-        np.savetxt("mech/%s/%s.csv" % (files[k], fluid), Data, delimiter=', ')
+        np.savetxt("mech/%s/%s.csv" % (files[k], names[i]), Data, delimiter=', ')
 
         # only save Temperature
         # Data = np.zeros((len(TPD_arr), 2))

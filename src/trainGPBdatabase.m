@@ -1,4 +1,4 @@
-p=parpool(8);
+% p=parpool(8);
 % Loading data
 tic
 dataNames = ["CO2","CH4","H2","O2","H2O"];
@@ -6,8 +6,8 @@ files = ["conductivity", "Cpmass", "Density", "Hmass", "Smass", "A", "Umass", "v
 
 N=size(dataNames,2);
 M=size(files,2);
-parfor i=1:N
-    
+for i=1:N
+  
     dataName=dataNames(i);
     for j=1:M
         file=files(j);
@@ -30,8 +30,9 @@ parfor i=1:N
         % Training
         Ntrain = floor(N*0.8);
         gprMdl = fitrgp(X(1:Ntrain,:), Y(1:Ntrain), 'BasisFunction', 'linear', ...
-               'KernelFunction','ardsquaredexponential', 'FitMethod','exact', ...
-               'PredictMethod', 'exact', 'OptimizeHyperparameters', 'auto');
+           'KernelFunction','ardsquaredexponential', 'FitMethod','exact', ...
+           'PredictMethod', 'exact', 'OptimizeHyperparameters', 'auto', ...
+           'HyperparameterOptimizationOptions',struct('UseParallel',1, 'ShowPlots',0));
 
         Xtest = X(Ntrain+1:end,:);
         Ytest = Y(Ntrain+1:end);
@@ -55,4 +56,4 @@ parfor i=1:N
     end
 end
 toc
-delete(p);
+% delete(p);
