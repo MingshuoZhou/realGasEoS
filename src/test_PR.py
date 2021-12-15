@@ -12,7 +12,7 @@ colors = ['r', 'b', 'g', 'c']
 #settings for C12
 fluid = "C12"
 X = {'c12h26':1}
-T_step = 3
+T_step = 4
 D_step = 20
 T_lo, T_hi = 275, 1000
 P_arr = 10*np.array([1]) * 1e6
@@ -82,33 +82,58 @@ for k,name in enumerate(names):
 
 # plt.ylim([0,30000])
 plt.xlabel("Temperature [K]")
+plt.ylabel("Cp_mole [J/kg/K]")
+plt.legend()
+plt.savefig("figs/PRAlphaGP_%s_Cp_mole.png"%fluid)
+#
+# # Cp_mass
+TPV_arr = deepcopy(TPD_arr)
+for i,(T,P,_) in enumerate(TPD_calc):
+    TPV_arr[i,2] = CP.PropsSI("C", "T", T, "P", P, fluid)
+
+fig = plt.figure()
+plt.plot(TPV_arr[:,0], TPV_arr[:,2], 'ks', label="NIST", fillstyle='none')
+
+for k,name in enumerate(names):
+    gas = ct.Solution(mechs[k], name)
+    TPV_calc = deepcopy(TPV_arr)
+
+    t0 = time.time()
+    for i,(T,P,_) in enumerate(TPD_calc):
+        gas.TPX = T, P, X
+        TPV_calc[i,2] = gas.cp_mass
+    print("Cp_mass cost of %-20s = %.5f s"%(name, time.time()-t0))
+    plt.plot(TPV_calc[:,0], TPV_calc[:,2], colors[k]+lines[k], label=name, alpha=0.8, fillstyle='none')
+
+# plt.ylim([0,30000])
+plt.xlabel("Temperature [K]")
 plt.ylabel("Cp_mass [J/kg/K]")
 plt.legend()
 plt.savefig("figs/PRAlphaGP_%s_Cp_mass.png"%fluid)
 #
 # # ================================================
-# # Enthalpy
-# TPV_arr = deepcopy(TPD_arr)
-# for i,(T,P,_) in enumerate(TPD_calc):
-#     TPV_arr[i,2] = CP.PropsSI("H", "T", T, "P", P, fluid)
-#
-# fig = plt.figure()
-# plt.plot(TPV_arr[:,0], TPV_arr[:,2], 'ks', label="NIST", fillstyle='none')
-#
-# for k,name in enumerate(names):
-#     gas = ct.Solution(mechs[k], name)
-#     TPV_calc = deepcopy(TPV_arr)
-#
-#     t0 = time.time()
-#     for i,(T,P,_) in enumerate(TPD_calc):
-#         gas.TPX = T, P, X
-#         TPV_calc[i,2] = gas.enthalpy_mass
-#     print("Enthalpy cost of %-20s = %.5f s"%(name, time.time()-t0))
-#     plt.plot(TPV_calc[:,0], TPV_calc[:,2], colors[k]+lines[k], label=name, alpha=0.8, fillstyle='none')
-# plt.xlabel("Temperature [K]")
-# plt.ylabel("Enthapy [J/kg]")
-# plt.legend()
-# plt.savefig("figs/PRAlphaGP_%s_Enthapy.png"%fluid)
+# Enthalpy
+TPV_arr = deepcopy(TPD_arr)
+for i,(T,P,_) in enumerate(TPD_calc):
+    TPV_arr[i,2] = CP.PropsSI("H", "T", T, "P", P, fluid)
+
+fig = plt.figure()
+plt.plot(TPV_arr[:,0], TPV_arr[:,2], 'ks', label="NIST", fillstyle='none')
+
+for k,name in enumerate(names):
+    gas = ct.Solution(mechs[k], name)
+    TPV_calc = deepcopy(TPV_arr)
+
+    t0 = time.time()
+    for i,(T,P,_) in enumerate(TPD_calc):
+        gas.TPX = T, P, X
+        TPV_calc[i,2] = gas.enthalpy_mass
+    print("Enthalpy cost of %-20s = %.5f s"%(name, time.time()-t0))
+    plt.plot(TPV_calc[:,0], TPV_calc[:,2], colors[k]+lines[k], label=name, alpha=0.8, fillstyle='none')
+plt.xlabel("Temperature [K]")
+plt.ylabel("Enthapy [J/kg]")
+plt.legend()
+plt.savefig("figs/PRAlphaGP_%s_Enthapy.png"%fluid)
 # # ================================================
 # # intenergy
 # TPV_arr = deepcopy(TPD_arr)

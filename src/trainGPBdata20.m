@@ -63,4 +63,4 @@ parfor i=1:N*M
 end
 toc
 
-% delete(p);
+delete(p);

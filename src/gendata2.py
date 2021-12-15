@@ -7,11 +7,11 @@ print(os.getcwd())
 # settings for CO2,CH4,H2,O2,H20
 fluids = ["CO2","CH4","H2","O2","H2O", "C12"]
 names = ["co2","ch4","h2","o2","h2o", "c12h26"]
-datanames = ["L", "C", "D", "H", "S", "A", "U", "V", "Cpmolar"]
-files = ["conductivity", "Cpmass", "Density", "Hmass", "Smass", "A", "Umass", "viscosity", "Cpmole"]
-steps = [0.002, 500, 50, 20000, 100, 25, 20000, 0.00005, 500]
+datanames = ["L", "C", "D", "H", "Hmolar", "S", "Smolar", "A", "U", "Umolar", "V", "Cpmolar"]
+files = ["conductivity", "Cpmass", "Density", "Hmass", "Hmole", "Smass", "Smole",  "A", "Umass", "Umole", "viscosity", "Cpmole"]
+steps = [0.002, 500, 50, 20000, 10000, 100, 100, 25, 20000, 10000, 0.00005, 500]
 T_step = 5
-T_lo, T_hi = 275, 1000
+T_lo, T_hi = 275, 800
 P_arr = np.array([10]) * 1e6
 for i, fluid in enumerate(fluids):
     Pcrit = CP.PropsSI(fluid, 'pcrit')
