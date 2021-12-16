@@ -1,8 +1,10 @@
 % p=parpool(8);
 % Loading data
 tic
-dataNames = ["CO2","CH4","H2","O2","H2O"];
-files = ["conductivity", "Cpmass", "Density", "Hmass", "Smass", "A", "Umass", "viscosity"];
+% dataNames = ["co2","ch4","h2","o2","h2o","c12h26"];
+% files = ["conductivity", "Cpmass", "Density", "Hmass", "Hmole", "Smass", "Smole", "A", "Umass", "Umole", "viscosity", "Cpmole"];
+dataNames = ["c12h26"];
+files = ["Hmole"];
 
 N=size(dataNames,2);
 M=size(files,2);
@@ -56,4 +58,4 @@ for i=1:N
     end
 end
 toc
-% delete(p);
+delete(p);

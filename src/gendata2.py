@@ -5,18 +5,20 @@ import os
 print(os.getcwd())
 
 # settings for CO2,CH4,H2,O2,H20
-fluids = ["CO2","CH4","H2","O2","H2O", "C12"]
-names = ["co2","ch4","h2","o2","h2o", "c12h26"]
+fluids = ["CO2","CH4", "C12","O2","H2O"]
+names = ["co2","ch4", "c12h26", "o2","h2o"]
 datanames = ["L", "C", "D", "H", "Hmolar", "S", "Smolar", "A", "U", "Umolar", "V", "Cpmolar"]
 files = ["conductivity", "Cpmass", "Density", "Hmass", "Hmole", "Smass", "Smole",  "A", "Umass", "Umole", "viscosity", "Cpmole"]
 steps = [0.002, 500, 50, 20000, 10000, 100, 100, 25, 20000, 10000, 0.00005, 500]
 T_step = 5
-T_lo, T_hi = 275, 800
+T_lo, T_hi = 300, 1000
 P_arr = np.array([10]) * 1e6
+
 for i, fluid in enumerate(fluids):
     Pcrit = CP.PropsSI(fluid, 'pcrit')
     Tcrit = CP.PropsSI(fluid, 'Tcrit')
     a, b = PR(Tcrit, Pcrit)
+    X={names[i]:1}
 
     # P_arr = np.array([0.5, 1, 1.817, 3, 5, 7.5, 10, 15, 20, 25, 30, 35, 40, 45, 50]) * 1e6
     # P_arr = np.linspace(0.5, 50, 20) * 1e6
@@ -37,14 +39,22 @@ for i, fluid in enumerate(fluids):
         T = TPD_arr[:, 0]
         P = TPD_arr[:, 1]
         D = TPD_arr[:, 2]
+        
+        if dataname == "Hmolar" or dataname == "Smolar" or dataname == "Umolar" or dataname == "Cpmolar":
+            D=D*1000 #reduces
+        if dataname == "Hmolar" or dataname == "Umolar":
+            gas = ct.Solution('mech2/nDodecane_temp.yaml','nDodecane_PR')
+            gas.TPX = T_lo, P_arr[0], X
+            TP0 = CP.PropsSI("Hmolar","T",T_lo,"P",P_arr[0],"PR::"+fluid) - gas.enthalpy_mass
+            D=D-TP0
         # print(T)
         # ===============
         # # show results
-        plt.figure()
-        plt.plot(T, D, 'gp')
-        plt.xlabel('T')
-        plt.ylabel(files[k])
-        plt.title(fluid)
+        # plt.figure()
+        # plt.plot(T, D, 'gp')
+        # plt.xlabel('T')
+        # plt.ylabel(files[k])
+        # plt.title(fluid)
 
         # ===============
         # # save results

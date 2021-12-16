@@ -2,8 +2,8 @@
 tic
 dataName = 'c12h26';
 
-dataFile = ['../mech2/Alpha/' dataName '.csv'];
-paraFile = ['../mech2/Alpha/' dataName '_para.csv'];
+dataFile = ['../mech2/Hmole/' dataName '.csv'];
+paraFile = ['../mech2/Hmole/' dataName '_para.csv'];
 
 % dataFile = ['../mech/CP/' dataName '.csv'];
 % paraFile = ['../mech/CP/' dataName '_para.csv'];
@@ -16,8 +16,8 @@ N = size(Data,1);
 dim = size(Data,2)-1;
 idx = randperm(N);
 X = Data(idx,1:dim);
-Y = Data(idx,end);
-
+Y = Data(idx,end)/max(Data(idx,end));
+yscale=max(Data(idx,end));
 % Training
 Ntrain = floor(N*0.8);
 gprMdl = fitrgp(X(1:Ntrain,:), Y(1:Ntrain), 'BasisFunction', 'linear', ...
@@ -40,7 +40,7 @@ disp(gprMdl.KernelInformation.KernelParameters)
 
 H=HGPB2(X(1:Ntrain,:),X(1:Ntrain,:),dim,gprMdl.KernelInformation.KernelParameters(1:dim),...,
 gprMdl.KernelInformation.KernelParameters(end))
-para = [gprMdl.KernelInformation.KernelParameters'; gprMdl.Beta';H];
+para = [gprMdl.KernelInformation.KernelParameters'; gprMdl.Beta';H; [yscale,0]];
 
 writematrix(para, paraFile);
 toc

@@ -5,7 +5,7 @@ clc; clear; close all;
 % Loading data
 tic
 dataNames = ["co2","ch4","h2","o2","h2o","c12h26"];
-files = ["conductivity", "Cpmass", "Density", "Hmass", "Smass", "A", "Umass", "viscosity", "Cpmole"];
+files = ["conductivity", "Cpmass", "Density", "Hmass", "Hmole", "Smass", "Smole", "A", "Umass", "Umole", "viscosity", "Cpmole"];
 
 N=size(dataNames,2);
 M=size(files,2);
@@ -21,19 +21,16 @@ parfor i=1:N*M
     dataFile = sprintf('../mech2/%s/%s.csv',file(i),dataName(i));
     paraFile = sprintf('../mech2/%s/%s_para.csv',file(i),dataName(i));
 
-    % dataFile = ['../mech/CP/' dataName '.csv'];
-    % paraFile = ['../mech/CP/' dataName '_para.csv'];
-
-    % dataFile = ['../mech/H/' dataName '.csv'];
-    % paraFile = ['../mech/H/' dataName '_para.csv'];
-
     Data = load(dataFile);
     N = size(Data,1);
     dim = size(Data,2)-1;
     idx = randperm(N);
     X = Data(idx,1:dim);
     Y = Data(idx,end);
-
+    
+    yscale=max(Y)-min(Y);
+    Y=Y/yscale;
+    
     % Training
     Ntrain = floor(N*0.8);
     gprMdl = fitrgp(X(1:Ntrain,:), Y(1:Ntrain), 'BasisFunction', 'linear', ...
@@ -56,7 +53,7 @@ parfor i=1:N*M
 
     H=HGPB2(X(1:Ntrain,:),X(1:Ntrain,:),dim,gprMdl.KernelInformation.KernelParameters(1:dim),...,
     gprMdl.KernelInformation.KernelParameters(end))
-    para = [gprMdl.KernelInformation.KernelParameters'; gprMdl.Beta';H];
+    para = [gprMdl.KernelInformation.KernelParameters'; gprMdl.Beta';H;[yscale,0]];
 
     writematrix(para, paraFile);
 

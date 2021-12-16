@@ -42,7 +42,7 @@ phases:
 - name: nDodecane_PR_ALphaGP
   thermo: Peng-RobinsonAlphaGP
   elements: [H, C, O, N]
-  species: [c12h26, o2]
+  species: [c12h26, o2, co2, h2o, ch4, h2]
   kinetics: gas
   reactions: none
   state:
@@ -111,6 +111,11 @@ species:
     model: Redlich-Kwong
     a: [6.45449e+12, 0]
     b: 29.65304882
+  equation-of-state:
+    model: Peng-Robinson
+    a: 3.9630e+11
+    b: 2.6667e+01
+    acentric-factor: 0.22394
   note: '121286'
 - name: h2o
   composition: {H: 2, O: 1}
@@ -126,6 +131,11 @@ species:
     model: Redlich-Kwong
     a: [1.42674e+13, 0]
     b: 21.12705912
+  equation-of-state:
+    model: Peng-Robinson
+    a: 5.9988e+11
+    b: 1.8971e+01
+    acentric-factor: 0.3442920843
   note: '-20387'
 - name: co
   composition: {C: 1, O: 1}
@@ -319,6 +329,11 @@ species:
     model: Redlich-Kwong
     a: [3.22224e+12, 0]
     b: 29.84830308
+  equation-of-state:
+    model: Peng-Robinson
+    a: 2.4958e+11
+    b: 2.6802e+01
+    acentric-factor: 0.01142
   note: '121286'
 - name: c2h2
   composition: {C: 2, H: 2}

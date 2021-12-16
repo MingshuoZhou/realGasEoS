@@ -1,8 +1,8 @@
 % Loading data
 dataName = 'c12h26';
 
-dataFile = ['../mech/Alpha/' dataName '.csv'];
-paraFile = ['../mech/Alpha/' dataName '_para.csv'];
+dataNames = ["co2","ch4","h2","o2","h2o","c12h26"];
+files = ["conductivity", "Cpmass", "Density", "Hmass", "Hmole", "Smass", "Smole", "A", "Umass", "Umole", "viscosity", "Cpmole"];
 
 Data = load(dataFile);
 N = size(Data,1);
