@@ -4,8 +4,8 @@ clc; clear; close all;
  p=parpool(8);
 % Loading data
 tic
-dataNames = ["co2","ch4","h2","o2","h2o","c12h26"];
-files = ["conductivity", "Cpmass", "Density", "Hmass", "Hmole", "Smass", "Smole", "A", "Umass", "Umole", "viscosity", "Cpmole"];
+dataNames = ["co2","ch4","o2","h2o","c12h26"];
+files = ["conductivity", "Cpmass", "Density", "Hmass", "Hmole", "Smass", "Smole", "A", "Umass", "Umole", "viscosity", "Cpmole", "Cvmole"];
 
 N=size(dataNames,2);
 M=size(files,2);
@@ -18,8 +18,12 @@ for i=1:N
 end
 
 parfor i=1:N*M
-    dataFile = sprintf('../mech2/%s/%s.csv',file(i),dataName(i));
-    paraFile = sprintf('../mech2/%s/%s_para.csv',file(i),dataName(i));
+    %model 2
+    % dataFile = sprintf('../mech2/%s/%s.csv',file(i),dataName(i));
+    % paraFile = sprintf('../mech2/%s/%s_para.csv',file(i),dataName(i));
+    % %model 3
+    dataFile = sprintf('../mech/%s/%s.csv',file(i),dataName(i));
+    paraFile = sprintf('../mech/%s/%s_para.csv',file(i),dataName(i));
 
     Data = load(dataFile);
     N = size(Data,1);
@@ -28,7 +32,7 @@ parfor i=1:N*M
     X = Data(idx,1:dim);
     Y = Data(idx,end);
     
-    yscale=max(Y)-min(Y);
+    yscale=(max(Y)-min(Y));
     Y=Y/yscale;
     
     % Training
@@ -50,10 +54,15 @@ parfor i=1:N*M
     disp(gprMdl.Beta)
     disp(gprMdl.KernelInformation.KernelParameterNames)
     disp(gprMdl.KernelInformation.KernelParameters)
-
-    H=HGPB2(X(1:Ntrain,:),X(1:Ntrain,:),dim,gprMdl.KernelInformation.KernelParameters(1:dim),...,
+    
+    % Model 2
+    % H=HGPB2(X(1:Ntrain,:),X(1:Ntrain,:),dim,gprMdl.KernelInformation.KernelParameters(1:dim),...,
+    % gprMdl.KernelInformation.KernelParameters(end))
+    % para = [gprMdl.KernelInformation.KernelParameters'; gprMdl.Beta';H;[yscale,0]];
+    % % model 3
+    H=HGPB(X(1:Ntrain,:),X(1:Ntrain,:),dim,gprMdl.KernelInformation.KernelParameters(1:dim),...,
     gprMdl.KernelInformation.KernelParameters(end))
-    para = [gprMdl.KernelInformation.KernelParameters'; gprMdl.Beta';H;[yscale,0]];
+    para = [gprMdl.KernelInformation.KernelParameters'; gprMdl.Beta';H;[yscale,0,0]];
 
     writematrix(para, paraFile);
 

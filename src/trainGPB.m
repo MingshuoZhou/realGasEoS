@@ -2,8 +2,8 @@
 tic
 dataName = 'c12h26';
 
-dataFile = ['../mech2/Hmole/' dataName '.csv'];
-paraFile = ['../mech2/Hmole/' dataName '_para.csv'];
+dataFile = ['../mech2/Smole/' dataName '.csv'];
+paraFile = ['../mech2/Smole/' dataName '_para.csv'];
 
 % dataFile = ['../mech/CP/' dataName '.csv'];
 % paraFile = ['../mech/CP/' dataName '_para.csv'];

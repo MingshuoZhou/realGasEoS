@@ -3,6 +3,7 @@ import numpy as np
 import cantera as ct
 import CoolProp.CoolProp as CP
 import matplotlib.pyplot as plt
+import math
 print('Running Cantera version: ' + ct.__version__)
 
 plt.rcParams['xtick.labelsize'] = 12
@@ -59,16 +60,16 @@ def get_TPD_under_P(fluid,P, T_lo, T_hi, T_step=20, D_step=40):
             count += 1
     return TPD_arr
 
-def get_data(fluid,P, T_lo, T_hi, T_step, D_step, Dataname):
+def get_data(fluid,P, T_lo, T_hi, T_step, D_step, Dataname, unit_convert):
     TPD_arr = []
     T = T_lo
-    D = CP.PropsSI("D", "T", T, "P", P, fluid)
+    D = CP.PropsSI("D", "T", T, "P", P, fluid)*unit_convert
     T_old = T
     D_old = D
     count = 0
     alpha = 0.50
     while T <= T_hi:
-        D = CP.PropsSI(Dataname, "T", T, "P", P, fluid)
+        D = CP.PropsSI(Dataname, "T", T, "P", P, fluid)*unit_convert
         if abs(D_old - D) < D_step or count > 5:
             TPD_arr.append([T, P, D])
             T_old = T
@@ -86,3 +87,43 @@ def get_data(fluid,P, T_lo, T_hi, T_step, D_step, Dataname):
     #     TPD_arr.append([T, P, D])
     #     T += T_step
     # return TPD_arr
+
+def equilSoundSpeeds(gas, rtol=1.0e-6, max_iter=5000):
+    """
+    Returns a tuple containing the equilibrium and frozen sound speeds for a
+    gas with an equilibrium composition.  The gas is first set to an
+    equilibrium state at the temperature and pressure of the gas, since
+    otherwise the equilibrium sound speed is not defined.
+    """
+
+    # set the gas to equilibrium at its current T and P
+    gas.equilibrate('TP', rtol=rtol, max_iter=max_iter)
+
+    # save properties
+    s0 = gas.s
+    p0 = gas.P
+    r0 = gas.density
+    # print(p0)
+    # perturb the pressure
+    p1 = p0*1.0001
+
+    # set the gas to a state with the same entropy and composition but
+    # the perturbed pressure
+    gas.SP = s0, p1
+
+    # frozen sound speed
+    afrozen = math.sqrt((p1 - p0)/(1.0001*gas.density - r0))
+
+    # now equilibrate the gas holding S and P constant
+    gas.equilibrate('SP', rtol=rtol, max_iter=max_iter)
+    print(gas.density, r0)
+
+    # equilibrium sound speed
+    aequil = math.sqrt(abs(p1 - p0)/abs(gas.density - r0))
+
+    # compute the frozen sound speed using the ideal gas expression as a check
+    gamma = gas.cp/gas.cv
+    afrozen2 = math.sqrt(gamma * ct.gas_constant * gas.T /
+                         gas.mean_molecular_weight)
+
+    return aequil, afrozen, afrozen2
