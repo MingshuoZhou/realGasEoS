@@ -14,7 +14,7 @@ name = 'c12h26'
 
 # ================================================
 # load data
-data = np.loadtxt("mech/Alpha/%s.csv"%name, delimiter=',')
+data = np.loadtxt("mech/Hmole/%s.csv"%name, delimiter=',')
 dim = data.shape[1]-1
 X = data[:,:dim]
 print(np.shape(X))
@@ -31,10 +31,11 @@ y = yall[idx[:Ntrain]]
 Xtest = Xall[idx[Ntrain:], :]
 ytest = yall[idx[Ntrain:]]
 
-para = np.loadtxt('mech/Alpha/%s_para.csv'%name, delimiter=',')
+para = np.loadtxt('mech/Hmole/%s_para.csv'%name, delimiter=',')
 𝛾 = para[0,:dim] # kernel size
 σ = para[0,dim]  # kernel multiplier
 θ = para[1,:]    # basis function's parameters
+yscale = 1;#para[5,0]
 print("theta:", θ)
 
 AS = CP.AbstractState("HEOS", fluid)
@@ -90,7 +91,7 @@ Xnew_l = np.empty([M,dim]) # left
 Xnew_r = np.empty([M,dim]) # right
 
 Xnew[:,0] = np.linspace(np.min(X[:,0]), np.max(X[:,0]),M)
-Xnew[:,1] = np.ones(M) * 2
+Xnew[:,1] = np.ones(M) * 10
 
 Xnew_l[:,0] = Xnew[:,0]-deltaTr
 Xnew_r[:,0] = Xnew[:,0]+deltaTr
@@ -114,44 +115,38 @@ Ki = np.linalg.inv(K + 1e-8*np.diag(np.ones(len(X))))
 Kxx = k(Xnew, Xnew, X, H, θ)
 Kx = k(X, Xnew, X, H, θ)
 
-mu = f(Xnew,θ) + Kx.T @ Ki @ (y-f(X,θ))
+mu = (f(Xnew,θ) + Kx.T @ Ki @ (y-f(X,θ))) * yscale
 cov = Kxx - Kx.T @ Ki @ Kx
 sigma = np.diag(cov)
 
-# Xnew = np.array([[600/Tc, 2e6/Pc]])
-Xn = np.array([[1.1, 2]])
-print("f=", f(Xn,θ))
-Kx = k(X, Xn, X, H, θ)
-print("y=",  f(Xn,θ) + Kx.T @ Ki @ (y-f(X,θ)))
-
 Ypred = f(X,θ) + K.T @ Ki @ (y-f(X,θ))
 # GP predict behind
-Kxx1 = k(Xnew_r, Xnew_r, X, H, θ)
-Kx1 = k(X, Xnew_r, X, H, θ)
+# Kxx1 = k(Xnew_r, Xnew_r, X, H, θ)
+# Kx1 = k(X, Xnew_r, X, H, θ)
 
-mu1 = f(Xnew_r,θ) + Kx1.T @ Ki @ (y-f(X,θ))
-cov1 = Kxx1 - Kx1.T @ Ki @ Kx1
-sigma1 = np.diag(cov1)
-#print(mu1)
-# GP predict front
-Kxx2 = k(Xnew_l, Xnew_l, X, H, θ)
-Kx2 = k(X, Xnew_l, X, H, θ)
+# mu1 = f(Xnew_r,θ) + Kx1.T @ Ki @ (y-f(X,θ))
+# cov1 = Kxx1 - Kx1.T @ Ki @ Kx1
+# sigma1 = np.diag(cov1)
+# #print(mu1)
+# # GP predict front
+# Kxx2 = k(Xnew_l, Xnew_l, X, H, θ)
+# Kx2 = k(X, Xnew_l, X, H, θ)
 
-mu2 = f(Xnew_l,θ) + Kx2.T @ Ki @ (y-f(X,θ))
-cov2 = Kxx2 - Kx2.T @ Ki @ Kx2
-sigma2 = np.diag(cov2)
+# mu2 = f(Xnew_l,θ) + Kx2.T @ Ki @ (y-f(X,θ))
+# cov2 = Kxx2 - Kx2.T @ Ki @ Kx2
+# sigma2 = np.diag(cov2)
 
 # ================================================
 # GP gradient, numerical
-dalphadT = [(mu1[i]-mu2[i])/2/deltaTr/Tc for i in range(M)]
-d2alphadT2 = [(mu1[i]-2 * mu[i]+mu2[i])/deltaTr**2/Tc**2 for i in range(M)]
+# dalphadT = [(mu1[i]-mu2[i])/2/deltaTr/Tc for i in range(M)]
+# d2alphadT2 = [(mu1[i]-2 * mu[i]+mu2[i])/deltaTr**2/Tc**2 for i in range(M)]
 #print(dalphadT)
 #print(d2alphadT2)
 
 # ================================================
 # PR gradient
-dalphadT_PR = [PR_dalphadT(Xnew[i,0]*Tc, Xnew[i,1]*Pc, Tc, Pc, omega) for i in range(M)]
-d2alphadT2_PR = [PR_d2alphadT2(Xnew[i,0]*Tc, Xnew[i,1]*Pc, Tc, Pc, omega) for i in range(M)]
+# dalphadT_PR = [PR_dalphadT(Xnew[i,0]*Tc, Xnew[i,1]*Pc, Tc, Pc, omega) for i in range(M)]
+# d2alphadT2_PR = [PR_d2alphadT2(Xnew[i,0]*Tc, Xnew[i,1]*Pc, Tc, Pc, omega) for i in range(M)]
 
 # ================================================
 # 2d plot
@@ -160,21 +155,21 @@ plt.plot(y, Ypred, 'gp', fillstyle='none')
 plt.xlabel("Groundtruth")
 plt.ylabel("Prediction")
 
-# 2d plot of dalphadT
-fig=plt.figure()
-plt.plot(Xnew[:,0],dalphadT,'gp')
-plt.plot(Xnew[:,0],dalphadT_PR,'k--')
-plt.xlabel("Tr")
-plt.ylabel("dalphadT")
-plt.legend(["f+GP","PR"])
+# # 2d plot of dalphadT
+# fig=plt.figure()
+# plt.plot(Xnew[:,0],dalphadT,'gp')
+# plt.plot(Xnew[:,0],dalphadT_PR,'k--')
+# plt.xlabel("Tr")
+# plt.ylabel("dalphadT")
+# plt.legend(["f+GP","PR"])
 
-# 2d plot of da2lphadT2
-fig=plt.figure()
-plt.plot(Xnew[:,0],d2alphadT2,'gp')
-plt.plot(Xnew[:,0],d2alphadT2_PR,'k--')
-plt.xlabel("Tr")
-plt.ylabel("d2alphadT2")
-plt.legend(["f+GP","PR"])
+# # 2d plot of da2lphadT2
+# fig=plt.figure()
+# plt.plot(Xnew[:,0],d2alphadT2,'gp')
+# plt.plot(Xnew[:,0],d2alphadT2_PR,'k--')
+# plt.xlabel("Tr")
+# plt.ylabel("d2alphadT2")
+# plt.legend(["f+GP","PR"])
 
 # 3d plot
 fig, ax = plt.subplots(subplot_kw={"projection":"3d"})
@@ -198,4 +193,4 @@ plt.ylabel("Prediction")
 plt.legend()
 fig.savefig("figs/PythonAlphaGPB_Validation_%s.png"%fluid)
 
-plt.show()
+# plt.show()

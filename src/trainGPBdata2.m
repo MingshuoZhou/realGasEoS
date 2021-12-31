@@ -3,8 +3,10 @@
 tic
 % dataNames = ["co2","ch4","h2","o2","h2o","c12h26"];
 % files = ["conductivity", "Cpmass", "Density", "Hmass", "Hmole", "Smass", "Smole", "A", "Umass", "Umole", "viscosity", "Cpmole"];
-dataNames = ["o2", "c12h26"];
-files = ["Z"];
+% dataNames = ["o2", "c12h26", "h2o", "nc10h22", "C6H5CH3", "c6h12", "co2"];
+% files = ["Alpha"];
+dataNames = ["co2", "n2"];
+files = ["Cpmass", "Density", "Hmass", "Hmole", "Smass", "Smole", "Umass", "Umole", "Cpmole", "Cvmole", "Z"];%, "Alpha"
 
 N=size(dataNames,2);
 M=size(files,2);
@@ -14,11 +16,11 @@ for i=1:N
     for j=1:M
         file=files(j);
         % model 2
-        % dataFile = sprintf('../mech2/%s/%s.csv',file,dataName);
-        % paraFile = sprintf('../mech2/%s/%s_para.csv',file,dataName);
+        dataFile = sprintf('../binarymech/%s/%s.csv',file,dataName);
+        paraFile = sprintf('../binarymech/%s/%s_para.csv',file,dataName);
         % model 3
-        dataFile = sprintf('../mech/%s/%s.csv',file,dataName);
-        paraFile = sprintf('../mech/%s/%s_para.csv',file,dataName);
+        % dataFile = sprintf('../mech/%s/%s.csv',file,dataName);
+        % paraFile = sprintf('../mech/%s/%s_para.csv',file,dataName);
 
         % dataFile = ['../mech/CP/' dataName '.csv'];
         % paraFile = ['../mech/CP/' dataName '_para.csv'];
@@ -54,13 +56,13 @@ for i=1:N
         disp(gprMdl.KernelInformation.KernelParameters)
 
         % model 2
-        % H=HGPB2(X(1:Ntrain,:),X(1:Ntrain,:),dim,gprMdl.KernelInformation.KernelParameters(1:dim),...,
-        % gprMdl.KernelInformation.KernelParameters(end));
-        % para = [gprMdl.KernelInformation.KernelParameters'; gprMdl.Beta';H];
-        % model 3
         H=HGPB2(X(1:Ntrain,:),X(1:Ntrain,:),dim,gprMdl.KernelInformation.KernelParameters(1:dim),...,
         gprMdl.KernelInformation.KernelParameters(end));
         para = [gprMdl.KernelInformation.KernelParameters'; gprMdl.Beta';H];
+        % model 3
+        % H=HGPB(X(1:Ntrain,:),X(1:Ntrain,:),dim,gprMdl.KernelInformation.KernelParameters(1:dim),...,
+        % gprMdl.KernelInformation.KernelParameters(end));
+        % para = [gprMdl.KernelInformation.KernelParameters'; gprMdl.Beta';H];
 
         writematrix(para, paraFile);
 

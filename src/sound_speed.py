@@ -6,4 +6,4 @@ if __name__ == "__main__":
     for n in range(27):
         T = 300.0 + 100.0 * n
         gas.TP = T, ct.one_atm*100
-        print(T, equilSoundSpeeds(gas)[1])
+        print(T, equilSoundSpeeds(gas))

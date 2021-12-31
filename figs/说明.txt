@@ -1,0 +1,7 @@
+fit-coolprop数据与模型预测对比
+prediction-随机取了600个点的预测情况
+validation-80%training 20%test
+7，10，15，20-7.38MPa（临界压力），10MPa，15MPa， 20MPa
+'A', 'C', 'D', 'H', 'L', 'S', 'V'-Soundspeed，Cp，Density，Enthalpy，Conductivity，Entropy，Viscosity
+
+温度范围250K-250K，与神经网络选取的一致，因此效果对比有意义

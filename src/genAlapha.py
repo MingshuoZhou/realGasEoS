@@ -21,8 +21,8 @@ print(os.getcwd())
 # P_arr = np.linspace(0.5, 50, 20) * 1e6
 
 # settings for O2
-fluid = "oxygen"
-name = "o2"
+fluid = "N2"
+name = "n2"
 M = 32 / 1000
 Pcrit = CP.PropsSI(fluid, 'pcrit')
 Tcrit = CP.PropsSI(fluid, 'Tcrit')
@@ -33,7 +33,7 @@ T_lo, T_hi = 300, 800
 # model 2
 # P_arr = np.array([10]) * 1e6
 # model 3
-P_arr = np.array([9.5, 10, 10.5]) * 1e6
+P_arr = np.array([6]) * 1e6
 
 # load omega
 AS = CP.AbstractState("HEOS", fluid)
@@ -52,8 +52,8 @@ T = TPD_arr[:,0]
 P = TPD_arr[:,1]
 D = TPD_arr[:,2]
 V = M / D
-# Alpha = (R*T/(V-b) - P) / a * (V*(V+b) + b*(V-b))
-# PR_Alpha  = PR_alpha(T, P, Tcrit, Pcrit, omega)
+Alpha = (R*T/(V-b) - P) / a * (V*(V+b) + b*(V-b))
+PR_Alpha  = PR_alpha(T, P, Tcrit, Pcrit, omega)
 
 # ===============
 # # show results
@@ -73,16 +73,16 @@ plt.legend()
 
 # ===============
 # # model 3
-Data = np.zeros(TPD_arr.shape)
-Data[:,0] = T / Tcrit
-Data[:,1] = P / Pcrit
-Data[:,2] = D
-np.savetxt("mech/Z/%s.csv"%name, Data, delimiter=', ')
+# Data = np.zeros(TPD_arr.shape)
+# Data[:,0] = T / Tcrit
+# Data[:,1] = P / Pcrit
+# Data[:,2] = Alpha
+# np.savetxt("mech/Alpha/%s.csv"%name, Data, delimiter=', ')
 
 # model 2
-# Data = np.zeros((len(TPD_arr), 2))
-# Data[:,0] = T / Tcrit
-# Data[:,1] = D
-# np.savetxt("mech2/Z/%s.csv"%name, Data, delimiter=', ')
+Data = np.zeros((len(TPD_arr), 2))
+Data[:,0] = T / Tcrit
+Data[:,1] = Alpha
+np.savetxt("mech2/kim/Alpha/%s.csv"%name, Data, delimiter=', ')
 
 plt.show()

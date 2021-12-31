@@ -1,11 +1,12 @@
 clc; clear; close all;
 
 %%
- p=parpool(8);
+%  p=parpool(8);
 % Loading data
 tic
-dataNames = ["co2","ch4","o2","h2o","c12h26"];
-files = ["conductivity", "Cpmass", "Density", "Hmass", "Hmole", "Smass", "Smole", "A", "Umass", "Umole", "viscosity", "Cpmole", "Cvmole"];
+dataNames = ["co2","h2o"];%,"nc10h22","o2","h2o","c12h26","C6H5CH3","c6h12",
+% dataNames = ["n2"]
+files = ["Cpmass", "Density", "Hmass", "Hmole", "Smass", "Smole",  "Umass", "Umole",  "Cpmole", "Cvmole", "Z"];
 
 N=size(dataNames,2);
 M=size(files,2);
@@ -17,13 +18,13 @@ for i=1:N
     end
 end
 
-parfor i=1:N*M
+for i=1:N*M
     %model 2
-    % dataFile = sprintf('../mech2/%s/%s.csv',file(i),dataName(i));
-    % paraFile = sprintf('../mech2/%s/%s_para.csv',file(i),dataName(i));
+    dataFile = sprintf('../binarymech/%s/%s.csv',file(i),dataName(i));
+    paraFile = sprintf('../binarymech/%s/%s_para.csv',file(i),dataName(i));
     % %model 3
-    dataFile = sprintf('../mech/%s/%s.csv',file(i),dataName(i));
-    paraFile = sprintf('../mech/%s/%s_para.csv',file(i),dataName(i));
+    % dataFile = sprintf('../mech/%s/%s.csv',file(i),dataName(i));
+    % paraFile = sprintf('../mech/%s/%s_para.csv',file(i),dataName(i));
 
     Data = load(dataFile);
     N = size(Data,1);
@@ -40,7 +41,7 @@ parfor i=1:N*M
     gprMdl = fitrgp(X(1:Ntrain,:), Y(1:Ntrain), 'BasisFunction', 'linear', ...
            'KernelFunction','ardsquaredexponential', 'FitMethod','exact', ...
            'PredictMethod', 'exact', 'OptimizeHyperparameters', 'auto', ...
-           'HyperparameterOptimizationOptions',struct('UseParallel',0, 'ShowPlots',0));
+           'HyperparameterOptimizationOptions',struct('UseParallel',1, 'ShowPlots',0));
 
     Xtest = X(Ntrain+1:end,:);
     Ytest = Y(Ntrain+1:end);
@@ -56,17 +57,17 @@ parfor i=1:N*M
     disp(gprMdl.KernelInformation.KernelParameters)
     
     % Model 2
-    % H=HGPB2(X(1:Ntrain,:),X(1:Ntrain,:),dim,gprMdl.KernelInformation.KernelParameters(1:dim),...,
-    % gprMdl.KernelInformation.KernelParameters(end))
-    % para = [gprMdl.KernelInformation.KernelParameters'; gprMdl.Beta';H;[yscale,0]];
-    % % model 3
-    H=HGPB(X(1:Ntrain,:),X(1:Ntrain,:),dim,gprMdl.KernelInformation.KernelParameters(1:dim),...,
+    H=HGPB2(X(1:Ntrain,:),X(1:Ntrain,:),dim,gprMdl.KernelInformation.KernelParameters(1:dim),...,
     gprMdl.KernelInformation.KernelParameters(end))
-    para = [gprMdl.KernelInformation.KernelParameters'; gprMdl.Beta';H;[yscale,0,0]];
+    para = [gprMdl.KernelInformation.KernelParameters'; gprMdl.Beta';H;[yscale,0]];
+    % % model 3
+    % H=HGPB(X(1:Ntrain,:),X(1:Ntrain,:),dim,gprMdl.KernelInformation.KernelParameters(1:dim),...,
+    % gprMdl.KernelInformation.KernelParameters(end))
+    % para = [gprMdl.KernelInformation.KernelParameters'; gprMdl.Beta';H;[yscale,0,0]];
 
     writematrix(para, paraFile);
 
 end
 toc
 
-delete(p);
+% delete(p);
