@@ -1,9 +1,10 @@
 % Loading data
 tic
-dataName = 'c12h26';
+dataname = "CO2";
+files = ["C"];
 
-dataFile = ['../mech2/Smole/' dataName '.csv'];
-paraFile = ['../mech2/Smole/' dataName '_para.csv'];
+dataFile = sprintf('../mechco2/%s_%s.csv',dataname, files);
+paraFile = sprintf('../mechco2/%s_%s_para.csv',dataname, files);
 
 % dataFile = ['../mech/CP/' dataName '.csv'];
 % paraFile = ['../mech/CP/' dataName '_para.csv'];
@@ -21,8 +22,8 @@ yscale=max(Data(idx,end));
 % Training
 Ntrain = floor(N*0.8);
 gprMdl = fitrgp(X(1:Ntrain,:), Y(1:Ntrain), 'BasisFunction', 'linear', ...
-           'KernelFunction','ardsquaredexponential', 'FitMethod','exact', ...
-           'PredictMethod', 'exact', 'OptimizeHyperparameters', 'auto', ...
+           'KernelFunction','ardexponential', 'FitMethod','exact', ...
+           'PredictMethod', 'exact','Optimizer', 'lbfgs', 'OptimizeHyperparameters', 'auto', ...
            'HyperparameterOptimizationOptions',struct('UseParallel',1, 'ShowPlots',0));
 
 Xtest = X(Ntrain+1:end,:);
@@ -38,9 +39,9 @@ disp(gprMdl.Beta)
 disp(gprMdl.KernelInformation.KernelParameterNames)
 disp(gprMdl.KernelInformation.KernelParameters)
 
-H=HGPB2(X(1:Ntrain,:),X(1:Ntrain,:),dim,gprMdl.KernelInformation.KernelParameters(1:dim),...,
+H=HGPB(X(1:Ntrain,:),X(1:Ntrain,:),dim,gprMdl.KernelInformation.KernelParameters(1:dim),...,
 gprMdl.KernelInformation.KernelParameters(end))
-para = [gprMdl.KernelInformation.KernelParameters'; gprMdl.Beta';H; [yscale,0]];
+para = [gprMdl.KernelInformation.KernelParameters'; gprMdl.Beta';H; [yscale,0,0]];
 
 writematrix(para, paraFile);
 toc

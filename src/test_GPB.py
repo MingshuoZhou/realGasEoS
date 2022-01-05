@@ -5,20 +5,22 @@ from copy import deepcopy
 np.random.seed(0)
 
 ## settings for C12
-fluid = "C12"
-name = 'c12h26'
-
+fluid = "CO2"
+name = 'co2'
+dataname = 'C'
 # # settings for O2
 #fluid = "oxygen"
 #name = "o2"
 
 # ================================================
 # load data
-data = np.loadtxt("mech/Hmole/%s.csv"%name, delimiter=',')
+data = np.loadtxt("mechco2/%s_%s.csv"%(fluid,dataname), delimiter=',')
+para = np.loadtxt('mechco2/%s_%s_para.csv'%(fluid,dataname), delimiter=',')
+yscale = para[5,0]
 dim = data.shape[1]-1
 X = data[:,:dim]
 print(np.shape(X))
-y = data[:,dim]
+y = data[:,dim]/yscale
 N = len(y)
 
 Ntrain = int(N*0.8)
@@ -31,11 +33,11 @@ y = yall[idx[:Ntrain]]
 Xtest = Xall[idx[Ntrain:], :]
 ytest = yall[idx[Ntrain:]]
 
-para = np.loadtxt('mech/Hmole/%s_para.csv'%name, delimiter=',')
+
 𝛾 = para[0,:dim] # kernel size
 σ = para[0,dim]  # kernel multiplier
 θ = para[1,:]    # basis function's parameters
-yscale = 1;#para[5,0]
+
 print("theta:", θ)
 
 AS = CP.AbstractState("HEOS", fluid)
@@ -50,7 +52,7 @@ def k0(X1, X2, 𝛾=𝛾, σ=σ):
     cov = np.zeros((len(X1), len(X2)))
     for i in range(len(X1)):
         for j in range(len(X2)):
-            cov[i,j] = σ**2 * np.exp(-np.sum((X1[i] - X2[j])**2/ 2 / 𝛾**2))
+            cov[i,j] = σ**2 * np.exp(-np.sqrt(np.sum((X1[i] - X2[j])**2/ 2 / 𝛾**2)))
     return cov
 
 # define basis function
@@ -83,35 +85,35 @@ def k(X1, X2, X, H, θ):
 
 # ================================================
 # random queries
-M = 200
+M = 1000
 
-deltaTr = 0.5/1000
+# deltaTr = 0.5/1000
 Xnew = np.empty([M,dim])
-Xnew_l = np.empty([M,dim]) # left
-Xnew_r = np.empty([M,dim]) # right
+# Xnew_l = np.empty([M,dim]) # left
+# Xnew_r = np.empty([M,dim]) # right
 
 Xnew[:,0] = np.linspace(np.min(X[:,0]), np.max(X[:,0]),M)
-Xnew[:,1] = np.ones(M) * 10
+Xnew[:,1] = np.ones(M) * 2
 
-Xnew_l[:,0] = Xnew[:,0]-deltaTr
-Xnew_r[:,0] = Xnew[:,0]+deltaTr
+# Xnew_l[:,0] = Xnew[:,0]-deltaTr
+# Xnew_r[:,0] = Xnew[:,0]+deltaTr
 
-Xnew_l[:,1] = Xnew[:,1]
-Xnew_r[:,1] = Xnew[:,1]
+# Xnew_l[:,1] = Xnew[:,1]
+# Xnew_r[:,1] = Xnew[:,1]
 
-#x1lim = [np.min(X[:,0]), np.max(X[:,0])]
-#x2lim = [np.min(X[:,1]), np.max(X[:,1])]
-#Xnew = np.random.rand(M, dim)
-#Xnew[:,0] = Xnew[:,0] * (x1lim[1] - x1lim[0]) + x1lim[0]
-#Xnew[:,1] = Xnew[:,1] * (x2lim[1] - x2lim[0]) + x2lim[0]
-#Xnew = Xnew[np.argsort(Xnew[:,1]),:]
-#Xnew = Xnew[np.argsort(Xnew[:,0]),:]
+# x1lim = [np.min(X[:,0]), np.max(X[:,0])]
+# x2lim = [np.min(X[:,1]), np.max(X[:,1])]
+# Xnew = np.random.rand(M, dim)
+# Xnew[:,0] = Xnew[:,0] * (x1lim[1] - x1lim[0]) + x1lim[0]
+# Xnew[:,1] = Xnew[:,1] * (x2lim[1] - x2lim[0]) + x2lim[0]
+# Xnew = Xnew[np.argsort(Xnew[:,1]),:]
+# Xnew = Xnew[np.argsort(Xnew[:,0]),:]
 #print(Xnewfront)
 
 # ================================================
 # GP predict
 K = k(X, X, X, H, θ)
-Ki = np.linalg.inv(K + 1e-8*np.diag(np.ones(len(X))))
+Ki = np.linalg.inv(K + 0*np.diag(np.ones(len(X))))
 Kxx = k(Xnew, Xnew, X, H, θ)
 Kx = k(X, Xnew, X, H, θ)
 
@@ -173,7 +175,7 @@ plt.ylabel("Prediction")
 
 # 3d plot
 fig, ax = plt.subplots(subplot_kw={"projection":"3d"})
-ax.scatter(X[:,0], X[:,1], y, 'r')
+ax.scatter(X[:,0], X[:,1], y*yscale, 'r')
 ax.scatter(Xnew[:,0], Xnew[:,1], mu, 'g')
 ax.set_xlabel("Tr")
 ax.set_ylabel("Pr")
@@ -193,4 +195,4 @@ plt.ylabel("Prediction")
 plt.legend()
 fig.savefig("figs/PythonAlphaGPB_Validation_%s.png"%fluid)
 
-# plt.show()
+plt.show()

@@ -1,7 +1,11 @@
 import numpy as np
+import time
 
 from utils import *
 from copy import deepcopy
+
+start = time.time()
+
 np.random.seed(0)
 # plt.ion()
 # ================================================
@@ -34,7 +38,7 @@ def k(X1, X2, X, H, θ, 𝛾, σ):
 
 ## settings for C12
 fluid = "CO2"
-name1 = ['10']#, '10', '15', '20'
+name1 = ['7', '10']#, '10', '15', '20'
 name2 = ['A', 'C', 'D', 'H','L', 'S', 'V']#'A', 'C', 'D', 'H',, 'S', 'V'
 # ================================================
 for i in range(len(name1)):
@@ -144,5 +148,7 @@ for i in range(len(name1)):
         # plt.pause(1e-6)
         del X, y, Xtest, ytest
 
-plt.show()
+# plt.show()
+end = time.time()
+print(str(end-start))
 # plt.pause(1e2)
