@@ -29,7 +29,7 @@ gprMdl = fitrgp(X(1:Ntrain,:), Y(1:Ntrain), 'BasisFunction', 'linear', ...
 Xtest = X(Ntrain+1:end,:);
 Ytest = Y(Ntrain+1:end);
 Xpre(:,1) = linspace(min(X(:,1)),max(X(:,1)),2000)';
-Xpre(:,2) = 1;
+Xpre(:,2) = linspace(min(X(:,2)),max(X(:,2)),
 
 Ypred = predict(gprMdl,Xtest);
 Ypre = predict(gprMdl,Xpre);

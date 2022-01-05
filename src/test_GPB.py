@@ -23,7 +23,7 @@ print(np.shape(X))
 y = data[:,dim]/yscale
 N = len(y)
 
-Ntrain = int(N*0.8)
+Ntrain = int(N*0.9)
 Ntest = N - Ntrain
 idx = np.random.permutation(N)
 Xall = deepcopy(X)
@@ -52,7 +52,7 @@ def k0(X1, X2, 𝛾=𝛾, σ=σ):
     cov = np.zeros((len(X1), len(X2)))
     for i in range(len(X1)):
         for j in range(len(X2)):
-            cov[i,j] = σ**2 * np.exp(-np.sqrt(np.sum((X1[i] - X2[j])**2/ 2 / 𝛾**2)))
+            cov[i,j] = σ**2 * np.exp(-np.sqrt(np.sum((X1[i] - X2[j])**2/ 𝛾**2)))
     return cov
 
 # define basis function
@@ -85,7 +85,7 @@ def k(X1, X2, X, H, θ):
 
 # ================================================
 # random queries
-M = 1000
+M = 200
 
 # deltaTr = 0.5/1000
 Xnew = np.empty([M,dim])
@@ -93,7 +93,7 @@ Xnew = np.empty([M,dim])
 # Xnew_r = np.empty([M,dim]) # right
 
 Xnew[:,0] = np.linspace(np.min(X[:,0]), np.max(X[:,0]),M)
-Xnew[:,1] = np.ones(M) * 2
+Xnew[:,1] = np.ones(M) * 1
 
 # Xnew_l[:,0] = Xnew[:,0]-deltaTr
 # Xnew_r[:,0] = Xnew[:,0]+deltaTr
