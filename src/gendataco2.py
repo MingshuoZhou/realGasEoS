@@ -7,7 +7,7 @@ print(os.getcwd())
 # settings for CO2
 fluids = ["CO2"]
 names = ["co2"]
-datanames = ["L", "V", "A", "C", "D", "H", "S"]#, "V", "A", "C", "D", "H", "S"
+datanames = ["V"]#, "V", "A", "C", "D", "H", "S"
 T_lo, T_hi = 250, 1250
 # model 2
 P_arr = np.array([7.38]) * 1e6 #, 10, 15, 20
@@ -30,8 +30,8 @@ for i, fluid in enumerate(fluids):
         TPD_arr = []
         for P in P_arr:
             if P == 7.38*1e6 or P == 10*1e6:
-                T_step = 3
-                T_min = 0.5
+                T_step = 2
+                T_min = 0.3
                 T_lo, T_hi = 250, 1250
             else:
                 T_step = 8

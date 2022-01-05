@@ -6,8 +6,8 @@ clc; clear; close all;
 tic
 dataNames = ["co2"];%,"nc10h22","o2","h2o","c12h26","C6H5CH3","c6h12",
 % dataNames = ["n2"]
-P = ["10"];%, '10', '15', '20'
-files = ["A", "C", "D", "H", "L", "S",  "V"];%"A", "C", "D", "H", , "S",  "V"
+P = ["7"];%, '10', '15', '20'
+files = ["A", "C", "D", "H","L" , "S",  "V"];%"A", "C", "D", "H", , "S",  "V"
 
 Pn=size(P,2);
 M=size(files,2);
@@ -32,12 +32,12 @@ for i=1:Pn
         Y=Y/yscale;
         
         % Training
-        Ntrain = floor(N*0.9);
+        Ntrain = floor(N*0.8);
         sigma0 = 0.5*std(Y(:));
         sigmaF0 = sigma0;
         d = size(X(:),2);
         sigmaM0 = 80*ones(d,1);%'KernelParameters',[sigmaM0;sigmaF0],'Sigma',sigma0,
-        gprMdl = fitrgp(X(1:Ntrain,:), Y(1:Ntrain), 'BasisFunction', 'linear', ...
+        gprMdl = fitrgp(X(0:Ntrain,:), Y(0:Ntrain), 'BasisFunction', 'linear', ...
             'KernelFunction','exponential',  ...
             'FitMethod','exact','PredictMethod', 'exact', 'Optimizer', 'lbfgs', 'OptimizeHyperparameters', 'auto', ...
             'HyperparameterOptimizationOptions',struct('UseParallel',1, 'ShowPlots',0));%,'AcquisitionFunctionName','expected-improvement-plus'
@@ -50,13 +50,13 @@ for i=1:Pn
         Ypred = predict(gprMdl,Xtest);
         Ypre = predict(gprMdl,Xpre);
 
-        plot(Y(1:Ntrain), Y(1:Ntrain), 'k--'); hold on;
-        plot(Y(1:Ntrain), resubPredict(gprMdl), 'rv'); hold on;
+        plot(Y(:), Y(:), 'k--'); hold on;
+        plot(Y(:), resubPredict(gprMdl), 'rv'); hold on;
         plot(Ytest, Ypred, 'b.'); hold on;
 
         figure()
         plot(X(1:Ntrain), Y(1:Ntrain), 'k*'); hold on;
-        plot(X(1:Ntrain), resubPredict(gprMdl), 'rv'); hold on;
+        plot(X(:), resubPredict(gprMdl), 'rv'); hold on;
         plot(Xtest, Ypred, 'g.'); hold on;
         plot(Xpre, Ypre, 'k'); hold on;
 
@@ -66,7 +66,7 @@ for i=1:Pn
         
         % Model 2
         H = HGPB2(X(1:Ntrain,:),X(1:Ntrain,:),dim,gprMdl.KernelInformation.KernelParameters(1:dim),...,
-        gprMdl.KernelInformation.KernelParameters(end))
+        gprMdl.KernelInformation.KernelParameters(end));
         para = [gprMdl.KernelInformation.KernelParameters'; gprMdl.Beta';H;[yscale,0]];
         % % model 3
         % H=HGPB(X(1:Ntrain,:),X(1:Ntrain,:),dim,gprMdl.KernelInformation.KernelParameters(1:dim),...,
