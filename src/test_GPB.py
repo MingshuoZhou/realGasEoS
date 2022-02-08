@@ -85,7 +85,7 @@ def k(X1, X2, X, H, θ):
 
 # ================================================
 # random queries
-M = 200
+M = 1000
 
 # deltaTr = 0.5/1000
 Xnew = np.empty([M,dim])

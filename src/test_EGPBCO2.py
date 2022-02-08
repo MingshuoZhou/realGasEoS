@@ -1,6 +1,8 @@
 import numpy as np
 import time
 
+from numpy.lib.function_base import average
+
 from utils import *
 from copy import deepcopy
 
@@ -38,7 +40,10 @@ def k(X1, X2, X, H, θ, 𝛾, σ):
 
 ## settings for C12
 fluid = "CO2"
+Pcrit = CP.PropsSI(fluid, 'pcrit')
+Tcrit = CP.PropsSI(fluid, 'Tcrit')
 name1 = ['7', '10']#, '10', '15', '20'
+pressure = [7.38, 10]
 name2 = ['A', 'C', 'D', 'H','L', 'S', 'V']#'A', 'C', 'D', 'H',, 'S', 'V'
 # ================================================
 for i in range(len(name1)):
@@ -94,6 +99,10 @@ for i in range(len(name1)):
         Xnew = np.random.rand(M, dim)
         Xnew[:,0] = Xnew[:,0] * (x1lim[1] - x1lim[0]) + x1lim[0]
         Xnew = Xnew[np.argsort(Xnew[:,0]),:]
+        Ytrue = np.zeros((M,1))
+
+        for i2 in range(M):
+            Ytrue[i2,0] = CP.PropsSI(name2[j], "T", Xnew[i2,0]*Tcrit, "P", pressure[i]*1e6, fluid)
 
         # ================================================
         # GP predict
@@ -103,11 +112,12 @@ for i in range(len(name1)):
         Kx = k(X, Xnew, X, H, θ, 𝛾, σ)
 
         mu = (f(Xnew,θ) + Kx.T @ Ki @ (y-f(X,θ))) * yscale
+        aad = (mu-Ytrue) / Ytrue *100
         cov = Kxx - Kx.T @ Ki @ Kx
         sigma = np.diag(cov)
 
         Ypred = f(X,θ) + K.T @ Ki @ (y-f(X,θ))
-
+        print(max(aad),average(aad),min(aad))
         # ================================================
         # 2d plot
         plt.figure()

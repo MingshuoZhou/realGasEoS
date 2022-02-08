@@ -1,5 +1,6 @@
 from matplotlib.pyplot import clf, close
 from utils import *
+import math
 plt.ion()
 import os
 print(os.getcwd())
@@ -10,7 +11,7 @@ names = ["co2"]
 datanames = ["C"]#, "V", "A", "C", "D", "H", "S"
 T_lo, T_hi = 250, 1250
 # model 2
-P_arr = np.array([6, 7.38, 8, 9, 10, 15, 20]) * 1e6 #, 10, 15, 20
+P_arr = np.array([7.38, 8, 9, 10, 12, 15, 17, 20]) * 1e6 #, 10, 15, 20
 
 for i, fluid in enumerate(fluids):
 
@@ -32,7 +33,7 @@ for i, fluid in enumerate(fluids):
             if P == 7.38*1e6 :
                 T_step = 2
                 T_min = 0.3
-            elif P == 10*1e6 or P == 8*1e6:
+            elif P == 10*1e6 or P == 8*1e6 or P == 9*1e6:
                 T_step = 3
                 T_min = 0.5
             else:
@@ -45,7 +46,7 @@ for i, fluid in enumerate(fluids):
         T1 = TPD_arr[:, 0]
         P1 = TPD_arr[:, 1]
         D1 = TPD_arr[:, 2]
-
+        
         # ===============
         # # save results
         plt.figure()
