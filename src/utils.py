@@ -125,6 +125,25 @@ def get_dataco2(fluid,P, T_lo, T_hi, T_step, T_min, Dataname):
             T = T - alpha*(T - T_old)
     return TPD_arr
 
+def get_dataptx(fluid,P, X, T_lo, T_hi, T_step, T_min, Dataname):
+    TPD_arr = []
+    T = T_lo
+    D = CP.PropsSI("D", "T", T, "P", P, fluid)
+    T_old = T
+    D_old = D
+    alpha = 0.50
+    # print(1)
+    while T <= T_hi:
+        D = CP.PropsSI(Dataname, "T", T, "P", P, fluid)
+        if abs((D_old - D)/D_old) < 0.05 or T-T_old< T_min:
+            TPD_arr.append([T, P, D, X])
+            T_old = T
+            D_old = D
+            T += T_step
+        else:
+            T = T - alpha*(T - T_old)
+    return TPD_arr
+
 def equilSoundSpeeds(gas, rtol=1.0e-6, max_iter=5000):
     """
     Returns a tuple containing the equilibrium and frozen sound speeds for a
